@@ -83,7 +83,7 @@ function Dashboard({ ordens, onNova, onVerOS }) {
 }
 
 function NovaOS({ onSalvar, onVoltar }) {
-  const [form, setForm] = useState({ nome: '', telefone: '', servico: '', descricao: '' })
+  const [form, setForm] = useState({ nome: '', telefone: '', servico: '', descricao: '', observacoes: '' })
 
   const atualiza = (campo, valor) => setForm(f => ({ ...f, [campo]: valor }))
 
@@ -120,6 +120,11 @@ function NovaOS({ onSalvar, onVoltar }) {
           <textarea value={form.descricao} onChange={e => atualiza('descricao', e.target.value)} placeholder="Descreva o que será feito..." rows={4}
             style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff', resize: 'vertical', fontFamily: 'sans-serif' }} />
         </div>
+        <div>
+          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Observações</label>
+          <textarea value={form.observacoes} onChange={e => atualiza('observacoes', e.target.value)} placeholder="Observações internas sobre a OS..." rows={3}
+            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff', resize: 'vertical', fontFamily: 'sans-serif' }} />
+        </div>
         <button onClick={salvar} style={{ width: '100%', marginTop: '0.5rem', background: '#378ADD', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
           Salvar OS
         </button>
@@ -128,7 +133,64 @@ function NovaOS({ onSalvar, onVoltar }) {
   )
 }
 
-function DetalheOS({ os, onVoltar, onMudarStatus }) {
+function EditarOS({ os, onSalvar, onVoltar }) {
+  const [form, setForm] = useState({
+    nome: os.nome,
+    telefone: os.telefone || '',
+    servico: os.servico,
+    descricao: os.descricao || '',
+    observacoes: os.observacoes || '',
+  })
+
+  const atualiza = (campo, valor) => setForm(f => ({ ...f, [campo]: valor }))
+
+  const salvar = () => {
+    if (!form.nome || !form.servico) return alert('Preencha nome e serviço!')
+    onSalvar(form)
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
+        <button onClick={onVoltar} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '8px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '14px', color: '#111827' }}>← Voltar</button>
+        <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#111827', margin: 0 }}>Editar OS</h1>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div>
+          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Nome do cliente *</label>
+          <input value={form.nome} onChange={e => atualiza('nome', e.target.value)} placeholder="Ex: Dr. João Silva"
+            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }} />
+        </div>
+        <div>
+          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Telefone do cliente</label>
+          <input value={form.telefone} onChange={e => atualiza('telefone', e.target.value)} placeholder="Ex: (35) 99999-9999"
+            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }} />
+        </div>
+        <div>
+          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Tipo de serviço *</label>
+          <input value={form.servico} onChange={e => atualiza('servico', e.target.value)} placeholder="Ex: Prontuário digital, Site, OS..."
+            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }} />
+        </div>
+        <div>
+          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Descrição</label>
+          <textarea value={form.descricao} onChange={e => atualiza('descricao', e.target.value)} placeholder="Descreva o que será feito..." rows={4}
+            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff', resize: 'vertical', fontFamily: 'sans-serif' }} />
+        </div>
+        <div>
+          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Observações</label>
+          <textarea value={form.observacoes} onChange={e => atualiza('observacoes', e.target.value)} placeholder="Observações internas sobre a OS..." rows={3}
+            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff', resize: 'vertical', fontFamily: 'sans-serif' }} />
+        </div>
+        <button onClick={salvar} style={{ width: '100%', marginTop: '0.5rem', background: '#378ADD', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
+          Salvar alterações
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function DetalheOS({ os, onVoltar, onMudarStatus, onEditar, onExcluir }) {
   const s = statusConfig[os.status]
 
   return (
@@ -138,7 +200,6 @@ function DetalheOS({ os, onVoltar, onMudarStatus }) {
         <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#111827', margin: 0 }}>Detalhe da OS</h1>
       </div>
 
-      {/* Card de info */}
       <div style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '12px', padding: '1.25rem', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
           <div>
@@ -158,15 +219,18 @@ function DetalheOS({ os, onVoltar, onMudarStatus }) {
             <div style={{ fontSize: '14px', color: '#111827' }}>{os.descricao || '—'}</div>
           </div>
           <div>
+            <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px' }}>OBSERVAÇÕES</div>
+            <div style={{ fontSize: '14px', color: '#111827' }}>{os.observacoes || '—'}</div>
+          </div>
+          <div>
             <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px' }}>DATA</div>
             <div style={{ fontSize: '14px', color: '#111827' }}>{os.data}</div>
           </div>
         </div>
       </div>
 
-      {/* Mudar status */}
       <p style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', marginBottom: '0.75rem' }}>Mudar status</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
         {Object.entries(statusConfig).map(([key, val]) => (
           <button key={key} onClick={() => onMudarStatus(key)}
             style={{ background: os.status === key ? val.bg : '#f9fafb', border: os.status === key ? `1.5px solid ${val.cor}` : '0.5px solid #e5e7eb', borderRadius: '10px', padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -176,10 +240,19 @@ function DetalheOS({ os, onVoltar, onMudarStatus }) {
           </button>
         ))}
       </div>
+
+      {/* Botões na parte inferior */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '1rem' }}>
+        <button onClick={onEditar} style={{ width: '100%', background: '#111827', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
+          ✏️ Editar OS
+        </button>
+        <button onClick={onExcluir} style={{ width: '100%', background: '#FEF2F2', color: '#DC2626', border: '0.5px solid #FECACA', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
+          🗑️ Excluir OS
+        </button>
+      </div>
     </div>
   )
 }
-
 export default function App() {
   const [tela, setTela] = useState('dashboard')
   const [ordens, setOrdens] = useState(() => {
@@ -195,6 +268,7 @@ export default function App() {
       telefone: form.telefone,
       servico: form.servico,
       descricao: form.descricao,
+      observacoes: form.observacoes,
       status: 'aberta',
       data: 'Agora',
     }
@@ -216,11 +290,28 @@ export default function App() {
     setOsSelecionada(prev => ({ ...prev, status: novoStatus }))
   }
 
+  const editarOS = (form) => {
+    const novasOrdens = ordens.map(o => o.id === osSelecionada.id ? { ...o, ...form } : o)
+    setOrdens(novasOrdens)
+    localStorage.setItem('ordens', JSON.stringify(novasOrdens))
+    setOsSelecionada(prev => ({ ...prev, ...form }))
+    setTela('detalhe')
+  }
+
+  const excluirOS = () => {
+    if (!confirm('Tem certeza que deseja excluir esta OS?')) return
+    const novasOrdens = ordens.filter(o => o.id !== osSelecionada.id)
+    setOrdens(novasOrdens)
+    localStorage.setItem('ordens', JSON.stringify(novasOrdens))
+    setTela('dashboard')
+  }
+
   return (
     <div style={{ background: '#ffffff', minHeight: '100vh', fontFamily: 'sans-serif', padding: '1.5rem 1rem', maxWidth: '420px', margin: '0 auto' }}>
       {tela === 'dashboard' && <Dashboard ordens={ordens} onNova={() => setTela('nova')} onVerOS={verOS} />}
       {tela === 'nova' && <NovaOS onSalvar={salvarOS} onVoltar={() => setTela('dashboard')} />}
-      {tela === 'detalhe' && <DetalheOS os={osSelecionada} onVoltar={() => setTela('dashboard')} onMudarStatus={mudarStatus} />}
+      {tela === 'detalhe' && <DetalheOS os={osSelecionada} onVoltar={() => setTela('dashboard')} onMudarStatus={mudarStatus} onEditar={() => setTela('editar')} onExcluir={excluirOS} />}
+      {tela === 'editar' && <EditarOS os={osSelecionada} onSalvar={editarOS} onVoltar={() => setTela('detalhe')} />}
     </div>
   )
 }
