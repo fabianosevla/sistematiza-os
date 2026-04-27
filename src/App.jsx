@@ -1,9 +1,9 @@
 import { useState } from 'react'
 
 const statusConfig = {
-  aberta:    { label: 'Aberta',       cor: '#378ADD', bg: '#E6F1FB', texto: '#185FA5' },
+  aberta: { label: 'Aberta', cor: '#378ADD', bg: '#E6F1FB', texto: '#185FA5' },
   andamento: { label: 'Em andamento', cor: '#f39c12', bg: '#FEF3C7', texto: '#92400E' },
-  concluida: { label: 'Concluída',    cor: '#2ecc71', bg: '#D1FAE5', texto: '#065F46' },
+  concluida: { label: 'Concluída', cor: '#2ecc71', bg: '#D1FAE5', texto: '#065F46' },
 }
 
 const dadosIniciais = [
@@ -14,8 +14,8 @@ const dadosIniciais = [
 
 function Dashboard({ ordens, onNova, onVerOS }) {
   const contagem = {
-    abertas:    ordens.filter(o => o.status === 'aberta').length,
-    andamento:  ordens.filter(o => o.status === 'andamento').length,
+    abertas: ordens.filter(o => o.status === 'aberta').length,
+    andamento: ordens.filter(o => o.status === 'andamento').length,
     concluidas: ordens.filter(o => o.status === 'concluida').length,
   }
 
@@ -31,9 +31,9 @@ function Dashboard({ ordens, onNova, onVerOS }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '1.75rem' }}>
         {[
-          { label: 'Abertas',      valor: contagem.abertas },
+          { label: 'Abertas', valor: contagem.abertas },
           { label: 'Em andamento', valor: contagem.andamento },
-          { label: 'Concluídas',   valor: contagem.concluidas },
+          { label: 'Concluídas', valor: contagem.concluidas },
         ].map(s => (
           <div key={s.label} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '10px', padding: '0.85rem 0.75rem', textAlign: 'center' }}>
             <div style={{ fontSize: '22px', fontWeight: '500', color: '#111827' }}>{s.valor}</div>
@@ -45,10 +45,10 @@ function Dashboard({ ordens, onNova, onVerOS }) {
       <p style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', marginBottom: '0.75rem' }}>Ações rápidas</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '1.75rem' }}>
         {[
-          { icon: '＋', label: 'Nova OS',    sub: 'Abrir ordem de serviço', cor: '#378ADD', acao: onNova },
-          { icon: '👤', label: 'Clientes',   sub: 'Ver ou cadastrar',       cor: '#2ecc71', acao: () => {} },
-          { icon: '📊', label: 'Relatórios', sub: 'Resumo do período',      cor: '#f39c12', acao: () => {} },
-          { icon: '📋', label: 'Histórico',  sub: 'OS concluídas',          cor: '#1D9E75', acao: () => {} },
+          { icon: '＋', label: 'Nova OS', sub: 'Abrir ordem de serviço', cor: '#378ADD', acao: onNova },
+          { icon: '👤', label: 'Clientes', sub: 'Ver ou cadastrar', cor: '#2ecc71', acao: () => { } },
+          { icon: '📊', label: 'Relatórios', sub: 'Resumo do período', cor: '#f39c12', acao: () => { } },
+          { icon: '📋', label: 'Histórico', sub: 'OS concluídas', cor: '#1D9E75', acao: () => { } },
         ].map(a => (
           <button key={a.label} onClick={a.acao} style={{ background: a.cor, border: 'none', borderRadius: '12px', padding: '1rem', textAlign: 'left', cursor: 'pointer' }}>
             <span style={{ fontSize: '16px', display: 'block', marginBottom: '0.5rem' }}>{a.icon}</span>
@@ -182,7 +182,10 @@ function DetalheOS({ os, onVoltar, onMudarStatus }) {
 
 export default function App() {
   const [tela, setTela] = useState('dashboard')
-  const [ordens, setOrdens] = useState(dadosIniciais)
+  const [ordens, setOrdens] = useState(() => {
+    const salvo = localStorage.getItem('ordens')
+    return salvo ? JSON.parse(salvo) : dadosIniciais
+  })
   const [osSelecionada, setOsSelecionada] = useState(null)
 
   const salvarOS = (form) => {
@@ -195,7 +198,9 @@ export default function App() {
       status: 'aberta',
       data: 'Agora',
     }
-    setOrdens(prev => [nova, ...prev])
+    const novasOrdens = [nova, ...ordens]
+    setOrdens(novasOrdens)
+    localStorage.setItem('ordens', JSON.stringify(novasOrdens))
     setTela('dashboard')
   }
 
@@ -205,15 +210,17 @@ export default function App() {
   }
 
   const mudarStatus = (novoStatus) => {
-    setOrdens(prev => prev.map(o => o.id === osSelecionada.id ? { ...o, status: novoStatus } : o))
+    const novasOrdens = ordens.map(o => o.id === osSelecionada.id ? { ...o, status: novoStatus } : o)
+    setOrdens(novasOrdens)
+    localStorage.setItem('ordens', JSON.stringify(novasOrdens))
     setOsSelecionada(prev => ({ ...prev, status: novoStatus }))
   }
 
   return (
     <div style={{ background: '#ffffff', minHeight: '100vh', fontFamily: 'sans-serif', padding: '1.5rem 1rem', maxWidth: '420px', margin: '0 auto' }}>
       {tela === 'dashboard' && <Dashboard ordens={ordens} onNova={() => setTela('nova')} onVerOS={verOS} />}
-      {tela === 'nova'      && <NovaOS onSalvar={salvarOS} onVoltar={() => setTela('dashboard')} />}
-      {tela === 'detalhe'   && <DetalheOS os={osSelecionada} onVoltar={() => setTela('dashboard')} onMudarStatus={mudarStatus} />}
+      {tela === 'nova' && <NovaOS onSalvar={salvarOS} onVoltar={() => setTela('dashboard')} />}
+      {tela === 'detalhe' && <DetalheOS os={osSelecionada} onVoltar={() => setTela('dashboard')} onMudarStatus={mudarStatus} />}
     </div>
   )
 }
