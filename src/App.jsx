@@ -1,18 +1,30 @@
 import { useState } from 'react'
+import { getOrdens, saveOrdens, getClientes, saveClientes, statusConfig } from './data/storage'
+import OSDetalhe from './components/OS/OSDetalhe'
+import OSForm from './components/OS/OSForm'
+import Recibo from './components/OS/Recibo'
+import ClientesList from './components/Clientes/ClientesList'
+import ClientesForm from './components/Clientes/ClientesForm'
+import Relatorios from './components/Relatorios'
+import Historico from './components/Historico'
 
-const statusConfig = {
-  aberta: { label: 'Aberta', cor: '#378ADD', bg: '#E6F1FB', texto: '#185FA5' },
-  andamento: { label: 'Em andamento', cor: '#f39c12', bg: '#FEF3C7', texto: '#92400E' },
-  concluida: { label: 'Concluída', cor: '#2ecc71', bg: '#D1FAE5', texto: '#065F46' },
+function Modal({ mensagem, onConfirmar, onCancelar }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
+      <div style={{ background: '#fff', borderRadius: '16px', padding: '2rem', maxWidth: '360px', width: '90%', textAlign: 'center', boxShadow: '0 24px 48px rgba(0,0,0,0.15)' }}>
+        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🗑️</div>
+        <p style={{ fontSize: '15px', color: '#111827', fontWeight: '500', marginBottom: '0.5rem' }}>Confirmar exclusão</p>
+        <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '1.5rem' }}>{mensagem}</p>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={onCancelar} style={{ flex: 1, background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '8px', padding: '0.75rem', fontSize: '14px', cursor: 'pointer', color: '#111827' }}>Cancelar</button>
+          <button onClick={onConfirmar} style={{ flex: 1, background: '#DC2626', border: 'none', borderRadius: '8px', padding: '0.75rem', fontSize: '14px', cursor: 'pointer', color: '#fff', fontWeight: '500' }}>Excluir</button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
-const dadosIniciais = [
-  { id: 1, nome: 'Dr. Carlos Mendes', telefone: '(35) 99111-2233', servico: 'Prontuário digital', descricao: 'Criar sistema de prontuário eletrônico.', status: 'andamento', data: 'Hoje' },
-  { id: 2, nome: 'Adv. Marina Costa', telefone: '(35) 98877-6655', servico: 'Sistema de processos', descricao: 'Controle de processos jurídicos.', status: 'aberta', data: 'Ontem' },
-  { id: 3, nome: 'Clínica Bem Estar', telefone: '(35) 3822-1100', servico: 'Agendamento online', descricao: 'Sistema de agendamento para clínica.', status: 'concluida', data: '3 dias atrás' },
-]
-
-function Dashboard({ ordens, onNova, onVerOS }) {
+function Dashboard({ ordens, onNavegar, onVerOS, onEditarOS, onExcluirOS }) {
   const contagem = {
     abertas: ordens.filter(o => o.status === 'aberta').length,
     andamento: ordens.filter(o => o.status === 'andamento').length,
@@ -23,295 +35,206 @@ function Dashboard({ ordens, onNova, onVerOS }) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
         <div>
-          <h1 style={{ fontSize: '20px', fontWeight: '500', color: '#111827', margin: 0 }}>Sistematiza OS</h1>
-          <p style={{ fontSize: '13px', color: '#6b7280', margin: '2px 0 0' }}>Olá, Fabiano 👋</p>
-        </div>
-        <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#E6F1FB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '500', color: '#0C447C' }}>FA</div>
+          <h1 style={{ fontSize: '22px', fontWeight: '600', color: '#111827', margin: 0 }}>Sistematiza OS</h1>
+          <p style={{ fontSize: '13px', color: '#6b7280', margin: '2px 0 0' }}>Olá, Cliente 👋</p>        </div>
+        <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#E6F1FB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '600', color: '#0C447C' }}>CL</div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '1.75rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '1.75rem' }}>
         {[
-          { label: 'Abertas', valor: contagem.abertas },
-          { label: 'Em andamento', valor: contagem.andamento },
-          { label: 'Concluídas', valor: contagem.concluidas },
+          { label: 'Abertas', valor: contagem.abertas, bg: '#E6F1FB', cor: '#185FA5' },
+          { label: 'Em andamento', valor: contagem.andamento, bg: '#FEF3C7', cor: '#92400E' },
+          { label: 'Concluídas', valor: contagem.concluidas, bg: '#D1FAE5', cor: '#065F46' },
         ].map(s => (
-          <div key={s.label} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '10px', padding: '0.85rem 0.75rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '22px', fontWeight: '500', color: '#111827' }}>{s.valor}</div>
-            <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>{s.label}</div>
+          <div key={s.label} style={{ background: s.bg, border: '0.5px solid #e5e7eb', borderRadius: '12px', padding: '1rem 0.75rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '26px', fontWeight: '600', color: s.cor }}>{s.valor}</div>
+            <div style={{ fontSize: '11px', color: s.cor, marginTop: '2px', opacity: 0.8 }}>{s.label}</div>
           </div>
         ))}
       </div>
 
       <p style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', marginBottom: '0.75rem' }}>Ações rápidas</p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '1.75rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '1.75rem' }}>
         {[
-          { icon: '＋', label: 'Nova OS', sub: 'Abrir ordem de serviço', cor: '#378ADD', acao: onNova },
-          { icon: '👤', label: 'Clientes', sub: 'Ver ou cadastrar', cor: '#2ecc71', acao: () => { } },
-          { icon: '📊', label: 'Relatórios', sub: 'Resumo do período', cor: '#f39c12', acao: () => { } },
-          { icon: '📋', label: 'Histórico', sub: 'OS concluídas', cor: '#1D9E75', acao: () => { } },
+          { icon: '👤', label: 'Clientes', sub: 'Ver ou cadastrar', cor: '#2ecc71', tela: 'clientes' },
+          { icon: '📊', label: 'Relatórios', sub: 'Resumo por status', cor: '#f39c12', tela: 'relatorios' },
+          { icon: '📋', label: 'Histórico', sub: 'OS concluídas', cor: '#1D9E75', tela: 'historico' },
         ].map(a => (
-          <button key={a.label} onClick={a.acao} style={{ background: a.cor, border: 'none', borderRadius: '12px', padding: '1rem', textAlign: 'left', cursor: 'pointer' }}>
-            <span style={{ fontSize: '16px', display: 'block', marginBottom: '0.5rem' }}>{a.icon}</span>
-            <span style={{ fontSize: '13px', fontWeight: '500', color: '#ffffff', display: 'block' }}>{a.label}</span>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.85)', display: 'block', marginTop: '2px' }}>{a.sub}</span>
+          <button key={a.label} onClick={() => onNavegar(a.tela)} style={{ background: a.cor, border: 'none', borderRadius: '12px', padding: '1rem', textAlign: 'left', cursor: 'pointer' }}>
+            <span style={{ fontSize: '18px', display: 'block', marginBottom: '0.4rem' }}>{a.icon}</span>
+            <span style={{ fontSize: '13px', fontWeight: '500', color: '#fff', display: 'block' }}>{a.label}</span>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)', display: 'block', marginTop: '2px' }}>{a.sub}</span>
           </button>
         ))}
       </div>
 
-      <p style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', marginBottom: '0.75rem' }}>OS recentes</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+        <p style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280' }}>Ordens de serviço</p>
+        <button onClick={() => onNavegar('os-nova')} style={{ background: '#378ADD', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.4rem 1rem', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>+ Nova OS</button>
+      </div>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {ordens.length === 0 && (
+          <p style={{ color: '#6b7280', fontSize: '14px', textAlign: 'center', padding: '2rem' }}>Nenhuma OS cadastrada.</p>
+        )}
         {ordens.map(os => {
           const s = statusConfig[os.status]
           return (
-            <div key={os.id} onClick={() => onVerOS(os)} style={{ background: '#ffffff', border: '0.5px solid #e5e7eb', borderRadius: '12px', padding: '1rem 1.1rem', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+            <div key={os.id} style={{ background: '#fff', border: '0.5px solid #e5e7eb', borderRadius: '12px', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: s.cor, flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => onVerOS(os)}>
                 <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{os.nome}</div>
                 <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>{os.servico} · {os.data}</div>
               </div>
-              <span style={{ fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '999px', background: s.bg, color: s.texto }}>{s.label}</span>
+              <span style={{ fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '999px', background: s.bg, color: s.texto, whiteSpace: 'nowrap' }}>{s.label}</span>
+              <button onClick={() => onEditarOS(os)} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '6px', padding: '0.35rem 0.65rem', cursor: 'pointer', fontSize: '13px' }}>✏️</button>
+              <button onClick={() => onExcluirOS(os)} style={{ background: '#FEF2F2', border: '0.5px solid #FECACA', borderRadius: '6px', padding: '0.35rem 0.65rem', cursor: 'pointer', fontSize: '13px' }}>🗑️</button>
             </div>
           )
         })}
       </div>
-
-      <button onClick={onNova} style={{ width: '100%', marginTop: '1.5rem', background: '#111827', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
-        + Nova ordem de serviço
-      </button>
     </div>
   )
 }
 
-function NovaOS({ onSalvar, onVoltar }) {
-  const [form, setForm] = useState({ nome: '', telefone: '', servico: '', descricao: '', observacoes: '' })
-
-  const atualiza = (campo, valor) => setForm(f => ({ ...f, [campo]: valor }))
-
-  const salvar = () => {
-    if (!form.nome || !form.servico) return alert('Preencha nome e serviço!')
-    onSalvar(form)
-  }
-
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
-        <button onClick={onVoltar} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '8px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '14px', color: '#111827' }}>← Voltar</button>
-        <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#111827', margin: 0 }}>Nova OS</h1>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Nome do cliente *</label>
-          <input value={form.nome} onChange={e => atualiza('nome', e.target.value)} placeholder="Ex: Dr. João Silva"
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }} />
-        </div>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Telefone do cliente</label>
-          <input value={form.telefone} onChange={e => atualiza('telefone', e.target.value)} placeholder="Ex: (35) 99999-9999"
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }} />
-        </div>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Tipo de serviço *</label>
-          <input value={form.servico} onChange={e => atualiza('servico', e.target.value)} placeholder="Ex: Prontuário digital, Site, OS..."
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }} />
-        </div>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Descrição</label>
-          <textarea value={form.descricao} onChange={e => atualiza('descricao', e.target.value)} placeholder="Descreva o que será feito..." rows={4}
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff', resize: 'vertical', fontFamily: 'sans-serif' }} />
-        </div>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Observações</label>
-          <textarea value={form.observacoes} onChange={e => atualiza('observacoes', e.target.value)} placeholder="Observações internas sobre a OS..." rows={3}
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff', resize: 'vertical', fontFamily: 'sans-serif' }} />
-        </div>
-        <button onClick={salvar} style={{ width: '100%', marginTop: '0.5rem', background: '#378ADD', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
-          Salvar OS
-        </button>
-      </div>
-    </div>
-  )
-}
-
-function EditarOS({ os, onSalvar, onVoltar }) {
-  const [form, setForm] = useState({
-    nome: os.nome,
-    telefone: os.telefone || '',
-    servico: os.servico,
-    descricao: os.descricao || '',
-    observacoes: os.observacoes || '',
-  })
-
-  const atualiza = (campo, valor) => setForm(f => ({ ...f, [campo]: valor }))
-
-  const salvar = () => {
-    if (!form.nome || !form.servico) return alert('Preencha nome e serviço!')
-    onSalvar(form)
-  }
-
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
-        <button onClick={onVoltar} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '8px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '14px', color: '#111827' }}>← Voltar</button>
-        <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#111827', margin: 0 }}>Editar OS</h1>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Nome do cliente *</label>
-          <input value={form.nome} onChange={e => atualiza('nome', e.target.value)} placeholder="Ex: Dr. João Silva"
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }} />
-        </div>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Telefone do cliente</label>
-          <input value={form.telefone} onChange={e => atualiza('telefone', e.target.value)} placeholder="Ex: (35) 99999-9999"
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }} />
-        </div>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Tipo de serviço *</label>
-          <input value={form.servico} onChange={e => atualiza('servico', e.target.value)} placeholder="Ex: Prontuário digital, Site, OS..."
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }} />
-        </div>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Descrição</label>
-          <textarea value={form.descricao} onChange={e => atualiza('descricao', e.target.value)} placeholder="Descreva o que será feito..." rows={4}
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff', resize: 'vertical', fontFamily: 'sans-serif' }} />
-        </div>
-        <div>
-          <label style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }}>Observações</label>
-          <textarea value={form.observacoes} onChange={e => atualiza('observacoes', e.target.value)} placeholder="Observações internas sobre a OS..." rows={3}
-            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff', resize: 'vertical', fontFamily: 'sans-serif' }} />
-        </div>
-        <button onClick={salvar} style={{ width: '100%', marginTop: '0.5rem', background: '#378ADD', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
-          Salvar alterações
-        </button>
-      </div>
-    </div>
-  )
-}
-
-function DetalheOS({ os, onVoltar, onMudarStatus, onEditar, onExcluir }) {
-  const s = statusConfig[os.status]
-
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
-        <button onClick={onVoltar} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '8px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '14px', color: '#111827' }}>← Voltar</button>
-        <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#111827', margin: 0 }}>Detalhe da OS</h1>
-      </div>
-
-      <div style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '12px', padding: '1.25rem', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-          <div>
-            <div style={{ fontSize: '16px', fontWeight: '500', color: '#111827' }}>{os.nome}</div>
-            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{os.telefone}</div>
-          </div>
-          <span style={{ fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '999px', background: s.bg, color: s.texto }}>{s.label}</span>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          <div>
-            <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px' }}>SERVIÇO</div>
-            <div style={{ fontSize: '14px', color: '#111827' }}>{os.servico}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px' }}>DESCRIÇÃO</div>
-            <div style={{ fontSize: '14px', color: '#111827' }}>{os.descricao || '—'}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px' }}>OBSERVAÇÕES</div>
-            <div style={{ fontSize: '14px', color: '#111827' }}>{os.observacoes || '—'}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px' }}>DATA</div>
-            <div style={{ fontSize: '14px', color: '#111827' }}>{os.data}</div>
-          </div>
-        </div>
-      </div>
-
-      <p style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', marginBottom: '0.75rem' }}>Mudar status</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
-        {Object.entries(statusConfig).map(([key, val]) => (
-          <button key={key} onClick={() => onMudarStatus(key)}
-            style={{ background: os.status === key ? val.bg : '#f9fafb', border: os.status === key ? `1.5px solid ${val.cor}` : '0.5px solid #e5e7eb', borderRadius: '10px', padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: val.cor }} />
-            <span style={{ fontSize: '14px', fontWeight: os.status === key ? '500' : '400', color: os.status === key ? val.texto : '#6b7280' }}>{val.label}</span>
-            {os.status === key && <span style={{ marginLeft: 'auto', fontSize: '12px', color: val.texto }}>✓ atual</span>}
-          </button>
-        ))}
-      </div>
-
-      {/* Botões na parte inferior */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '1rem' }}>
-        <button onClick={onEditar} style={{ width: '100%', background: '#111827', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
-          ✏️ Editar OS
-        </button>
-        <button onClick={onExcluir} style={{ width: '100%', background: '#FEF2F2', color: '#DC2626', border: '0.5px solid #FECACA', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
-          🗑️ Excluir OS
-        </button>
-      </div>
-    </div>
-  )
-}
 export default function App() {
   const [tela, setTela] = useState('dashboard')
-  const [ordens, setOrdens] = useState(() => {
-    const salvo = localStorage.getItem('ordens')
-    return salvo ? JSON.parse(salvo) : dadosIniciais
-  })
+  const [ordens, setOrdens] = useState(getOrdens)
+  const [clientes, setClientes] = useState(getClientes)
   const [osSelecionada, setOsSelecionada] = useState(null)
+  const [clienteSelecionado, setClienteSelecionado] = useState(null)
+  const [modal, setModal] = useState(null)
 
   const salvarOS = (form) => {
-    const nova = {
-      id: ordens.length + 1,
-      nome: form.nome,
-      telefone: form.telefone,
-      servico: form.servico,
-      descricao: form.descricao,
-      observacoes: form.observacoes,
-      status: 'aberta',
-      data: 'Agora',
+    let novasOrdens
+    if (osSelecionada) {
+      novasOrdens = ordens.map(o => o.id === osSelecionada.id ? { ...o, ...form } : o)
+    } else {
+      const nova = { id: Date.now(), ...form, status: 'aberta', data: new Date().toLocaleDateString('pt-BR') }
+      novasOrdens = [nova, ...ordens]
     }
-    const novasOrdens = [nova, ...ordens]
     setOrdens(novasOrdens)
-    localStorage.setItem('ordens', JSON.stringify(novasOrdens))
+    saveOrdens(novasOrdens)
+    setOsSelecionada(null)
     setTela('dashboard')
   }
 
-  const verOS = (os) => {
-    setOsSelecionada(os)
-    setTela('detalhe')
+  const excluirOS = (os) => {
+    setModal({
+      mensagem: `Deseja excluir a OS de "${os.nome}"?`,
+      onConfirmar: () => {
+        const novasOrdens = ordens.filter(o => o.id !== os.id)
+        setOrdens(novasOrdens)
+        saveOrdens(novasOrdens)
+        setModal(null)
+        setTela('dashboard')
+      }
+    })
   }
 
   const mudarStatus = (novoStatus) => {
     const novasOrdens = ordens.map(o => o.id === osSelecionada.id ? { ...o, status: novoStatus } : o)
     setOrdens(novasOrdens)
-    localStorage.setItem('ordens', JSON.stringify(novasOrdens))
+    saveOrdens(novasOrdens)
     setOsSelecionada(prev => ({ ...prev, status: novoStatus }))
   }
 
-  const editarOS = (form) => {
-    const novasOrdens = ordens.map(o => o.id === osSelecionada.id ? { ...o, ...form } : o)
-    setOrdens(novasOrdens)
-    localStorage.setItem('ordens', JSON.stringify(novasOrdens))
-    setOsSelecionada(prev => ({ ...prev, ...form }))
-    setTela('detalhe')
+  const salvarCliente = (form) => {
+    let novosClientes
+    if (clienteSelecionado) {
+      novosClientes = clientes.map(c => c.id === clienteSelecionado.id ? { ...c, ...form } : c)
+    } else {
+      const novo = { id: Date.now(), ...form }
+      novosClientes = [novo, ...clientes]
+    }
+    setClientes(novosClientes)
+    saveClientes(novosClientes)
+    setClienteSelecionado(null)
+    setTela('clientes')
   }
 
-  const excluirOS = () => {
-    if (!confirm('Tem certeza que deseja excluir esta OS?')) return
-    const novasOrdens = ordens.filter(o => o.id !== osSelecionada.id)
-    setOrdens(novasOrdens)
-    localStorage.setItem('ordens', JSON.stringify(novasOrdens))
-    setTela('dashboard')
+  const excluirCliente = (cliente) => {
+    setModal({
+      mensagem: `Deseja excluir o cliente "${cliente.nome}"?`,
+      onConfirmar: () => {
+        const novosClientes = clientes.filter(c => c.id !== cliente.id)
+        setClientes(novosClientes)
+        saveClientes(novosClientes)
+        setModal(null)
+      }
+    })
+  }
+
+  const navegar = (destino) => {
+    setOsSelecionada(null)
+    setClienteSelecionado(null)
+    setTela(destino)
   }
 
   return (
-    <div style={{ background: '#ffffff', minHeight: '100vh', fontFamily: 'sans-serif', padding: '1.5rem 1rem', maxWidth: '420px', margin: '0 auto' }}>
-      {tela === 'dashboard' && <Dashboard ordens={ordens} onNova={() => setTela('nova')} onVerOS={verOS} />}
-      {tela === 'nova' && <NovaOS onSalvar={salvarOS} onVoltar={() => setTela('dashboard')} />}
-      {tela === 'detalhe' && <DetalheOS os={osSelecionada} onVoltar={() => setTela('dashboard')} onMudarStatus={mudarStatus} onEditar={() => setTela('editar')} onExcluir={excluirOS} />}
-      {tela === 'editar' && <EditarOS os={osSelecionada} onSalvar={editarOS} onVoltar={() => setTela('detalhe')} />}
+    <div style={{ background: '#f9fafb', minHeight: '100vh', fontFamily: 'sans-serif' }}>
+      <div style={{ background: '#ffffff', maxWidth: '960px', margin: '0 auto', minHeight: '100vh', padding: '1.5rem 2rem', boxShadow: '0 0 40px rgba(0,0,0,0.06)' }}>
+
+        {modal && <Modal mensagem={modal.mensagem} onConfirmar={modal.onConfirmar} onCancelar={() => setModal(null)} />}
+
+        {tela === 'dashboard' && (
+          <Dashboard
+            ordens={ordens}
+            onNavegar={navegar}
+            onVerOS={(os) => { setOsSelecionada(os); setTela('os-detalhe') }}
+            onEditarOS={(os) => { setOsSelecionada(os); setTela('os-nova') }}
+            onExcluirOS={excluirOS}
+          />
+        )}
+
+        {tela === 'os-nova' && (
+          <OSForm
+            os={osSelecionada}
+            onSalvar={salvarOS}
+            onVoltar={() => setTela('dashboard')}
+          />
+        )}
+
+        {tela === 'os-detalhe' && osSelecionada && (
+          <OSDetalhe
+            os={osSelecionada}
+            onVoltar={() => setTela('dashboard')}
+            onEditar={() => setTela('os-nova')}
+            onExcluir={() => excluirOS(osSelecionada)}
+            onMudarStatus={mudarStatus}
+            onEmitirRecibo={() => setTela('recibo')}
+          />
+        )}
+
+        {tela === 'recibo' && osSelecionada && (
+          <Recibo
+            os={osSelecionada}
+            onVoltar={() => setTela('os-detalhe')}
+          />
+        )}
+
+        {tela === 'clientes' && (
+          <ClientesList
+            clientes={clientes}
+            onNovo={() => { setClienteSelecionado(null); setTela('cliente-form') }}
+            onEditar={(c) => { setClienteSelecionado(c); setTela('cliente-form') }}
+            onExcluir={excluirCliente}
+            onVoltar={() => setTela('dashboard')}
+          />
+        )}
+
+        {tela === 'cliente-form' && (
+          <ClientesForm
+            cliente={clienteSelecionado}
+            onSalvar={salvarCliente}
+            onVoltar={() => setTela('clientes')}
+          />
+        )}
+
+        {tela === 'relatorios' && <Relatorios ordens={ordens} onVoltar={() => setTela('dashboard')} />}
+        {tela === 'historico' && <Historico ordens={ordens} onVoltar={() => setTela('dashboard')} />}
+
+      </div>
     </div>
   )
 }
