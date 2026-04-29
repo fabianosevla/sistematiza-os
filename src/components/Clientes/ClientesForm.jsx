@@ -1,17 +1,22 @@
 import { useState } from 'react'
 
-const campoStyle = { width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '0.5px solid #e5e7eb', fontSize: '14px', color: '#111827', outline: 'none', background: '#fff' }
-const labelStyle = { fontSize: '13px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '0.4rem' }
+const field = {
+  label: { fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' },
+  input: { width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', fontSize: '14px', color: 'var(--text-primary)', outline: 'none', background: 'var(--bg-layer-01)', transition: 'border-color 0.15s', fontFamily: 'DM Sans, sans-serif' },
+}
+
+const focus = (e) => e.target.style.borderColor = 'var(--brand)'
+const blur  = (e) => e.target.style.borderColor = 'var(--border-subtle)'
 
 export default function ClientesForm({ cliente, onSalvar, onVoltar }) {
   const [form, setForm] = useState({
-    nome: cliente?.nome || '',
+    nome:     cliente?.nome     || '',
     telefone: cliente?.telefone || '',
-    email: cliente?.email || '',
-    empresa: cliente?.empresa || '',
+    email:    cliente?.email    || '',
+    empresa:  cliente?.empresa  || '',
   })
 
-  const atualiza = (campo, valor) => setForm(f => ({ ...f, [campo]: valor }))
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const salvar = () => {
     if (!form.nome) return alert('Preencha o nome do cliente!')
@@ -21,32 +26,49 @@ export default function ClientesForm({ cliente, onSalvar, onVoltar }) {
   const isEdicao = !!cliente
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
-        <button onClick={onVoltar} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '8px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '14px', color: '#111827' }}>← Voltar</button>
-        <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#111827', margin: 0 }}>{isEdicao ? 'Editar cliente' : 'Novo cliente'}</h1>
+    <div style={{ padding: '32px' }}>
+
+      {/* Header */}
+      <div style={{ marginBottom: '28px' }}>
+        <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+          <span style={{ cursor: 'pointer', color: 'var(--brand)' }} onClick={onVoltar}>← Voltar</span>
+        </p>
+        <h1 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
+          {isEdicao ? 'Editar cliente' : 'Novo cliente'}
+        </h1>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+          {isEdicao ? 'Atualize os dados do cliente' : 'Preencha os dados para cadastrar um novo cliente'}
+        </p>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <label style={labelStyle}>Nome *</label>
-          <input value={form.nome} onChange={e => atualiza('nome', e.target.value)} placeholder="Ex: Dr. João Silva" style={campoStyle} />
+      <div style={{ background: 'var(--bg-layer-01)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-subtle)', padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div>
+            <label style={field.label}>Nome *</label>
+            <input value={form.nome} onChange={e => set('nome', e.target.value)} placeholder="Ex: Dr. João Silva" style={field.input} onFocus={focus} onBlur={blur} />
+          </div>
+          <div>
+            <label style={field.label}>Telefone</label>
+            <input value={form.telefone} onChange={e => set('telefone', e.target.value)} placeholder="(35) 99999-9999" style={field.input} onFocus={focus} onBlur={blur} />
+          </div>
+          <div>
+            <label style={field.label}>E-mail</label>
+            <input value={form.email} onChange={e => set('email', e.target.value)} placeholder="joao@email.com" style={field.input} onFocus={focus} onBlur={blur} />
+          </div>
+          <div>
+            <label style={field.label}>Empresa / Clínica</label>
+            <input value={form.empresa} onChange={e => set('empresa', e.target.value)} placeholder="Ex: Clínica São Lucas" style={field.input} onFocus={focus} onBlur={blur} />
+          </div>
         </div>
-        <div>
-          <label style={labelStyle}>Telefone</label>
-          <input value={form.telefone} onChange={e => atualiza('telefone', e.target.value)} placeholder="Ex: (35) 99999-9999" style={campoStyle} />
-        </div>
-        <div>
-          <label style={labelStyle}>E-mail</label>
-          <input value={form.email} onChange={e => atualiza('email', e.target.value)} placeholder="Ex: joao@email.com" style={campoStyle} />
-        </div>
-        <div>
-          <label style={labelStyle}>Empresa / Clínica</label>
-          <input value={form.empresa} onChange={e => atualiza('empresa', e.target.value)} placeholder="Ex: Clínica São Lucas" style={campoStyle} />
-        </div>
-        <button onClick={salvar} style={{ width: '100%', marginTop: '0.5rem', background: '#2ecc71', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
-          {isEdicao ? 'Salvar alterações' : 'Salvar cliente'}
+
+        <button onClick={salvar}
+          style={{ width: '100%', marginTop: '4px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', padding: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+          onMouseEnter={e => e.target.style.background = 'var(--brand-hover)'}
+          onMouseLeave={e => e.target.style.background = 'var(--brand)'}>
+          {isEdicao ? 'Salvar alterações' : 'Cadastrar cliente'}
         </button>
+
       </div>
     </div>
   )

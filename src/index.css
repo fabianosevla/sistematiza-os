@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+:root {
+  /* Foundational */
+  --bg-primary: #F4F4F4;
+  --bg-layer-01: #FFFFFF;
+  --bg-layer-02: #F0F0F0;
+
+  /* Borders */
+  --border-subtle: #D5DADD;
+  --border-strong: #B0B8BD;
+
+  /* Text */
+  --text-primary: #161616;
+  --text-secondary: #525252;
+  --text-placeholder: #8D8D8D;
+  --text-on-color: #FFFFFF;
+
+  /* Brand */
+  --brand: #0052CC;
+  --brand-hover: #0043A4;
+  --brand-light: #E8F0FE;
+
+  /* Status */
+  --status-open: #0052CC;
+  --status-open-bg: #EEF4FF;
+  --status-open-text: #003A99;
+
+  --status-progress: #D97706;
+  --status-progress-bg: #FFFBEB;
+  --status-progress-text: #92400E;
+
+  --status-done: #059669;
+  --status-done-bg: #ECFDF5;
+  --status-done-text: #065F46;
+
+  /* Payment */
+  --pay-pending: #DC2626;
+  --pay-pending-bg: #FEF2F2;
+  --pay-partial: #D97706;
+  --pay-partial-bg: #FFFBEB;
+  --pay-paid: #059669;
+  --pay-paid-bg: #ECFDF5;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+input, textarea, select, button {
+  font-family: 'DM Sans', sans-serif;
+}

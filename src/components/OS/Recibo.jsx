@@ -1,84 +1,96 @@
-const fmt = (v) => v ? `R$ ${parseFloat(v).toFixed(2).replace('.', ',')}` : 'R$ 0,00'
+const fmt = (v) => `R$ ${parseFloat(v || 0).toFixed(2).replace('.', ',')}`
 
 export default function Recibo({ os, onVoltar }) {
-  const imprimir = () => window.print()
-
   return (
-    <div>
-      <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
-        <button onClick={onVoltar} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '8px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '14px', color: '#111827' }}>← Voltar</button>
-        <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#111827', margin: 0, flex: 1 }}>Recibo</h1>
-        <button onClick={imprimir} style={{ background: '#111827', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.5rem 1.25rem', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>🖨️ Imprimir / Salvar PDF</button>
+    <div style={{ padding: '32px' }}>
+
+      <div className="no-print" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
+        <div>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            <span style={{ cursor: 'pointer', color: 'var(--brand)' }} onClick={onVoltar}>← Voltar</span>
+          </p>
+          <h1 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>Recibo</h1>
+        </div>
+        <button onClick={() => window.print()}
+          style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', padding: '10px 20px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          🖨️ Imprimir / Salvar PDF
+        </button>
       </div>
 
-      <div id="recibo-content" style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '2.5rem', maxWidth: '600px', margin: '0 auto' }}>
+      <div id="recibo-content" style={{ background: 'var(--bg-layer-01)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)', padding: '40px', maxWidth: '600px', margin: '0 auto' }}>
 
-        {/* Cabeçalho */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem', paddingBottom: '1.5rem', borderBottom: '2px solid #e5e7eb' }}>
-          <div style={{ fontSize: '22px', fontWeight: '800', color: '#111827', fontFamily: 'sans-serif' }}>
-            sistematiza<span style={{ color: '#00c2cb' }}>.ai</span>
-          </div>
-          <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>Recibo de Serviço</div>
-        </div>
-
-        {/* Número e data */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+        {/* Topo */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid var(--border-subtle)' }}>
           <div>
-            <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '600', letterSpacing: '0.08em' }}>Nº DA OS</div>
-            <div style={{ fontSize: '14px', color: '#111827', fontWeight: '500' }}>#{os.id}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+                <g transform="rotate(90,50,50)">
+                  <path d="M25 22L8 50L25 78" stroke="#2ecc71" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M75 22L92 50L75 78" stroke="#2ecc71" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M63 10L37 90" stroke="#2ecc71" strokeWidth="11" strokeLinecap="round"/>
+                </g>
+              </svg>
+              <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)' }}>
+                sistematiza<span style={{ color: 'var(--brand)' }}>.ai</span>
+              </span>
+            </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Recibo de Serviço</p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '600', letterSpacing: '0.08em' }}>DATA</div>
-            <div style={{ fontSize: '14px', color: '#111827', fontWeight: '500' }}>{os.data}</div>
+            <p style={{ fontSize: '11px', color: 'var(--text-placeholder)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Nº da OS</p>
+            <p style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>#{os.id}</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>{os.data}</p>
           </div>
         </div>
 
         {/* Cliente */}
-        <div style={{ background: '#f9fafb', borderRadius: '10px', padding: '1.25rem', marginBottom: '1.5rem' }}>
-          <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '600', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>CLIENTE</div>
-          <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827' }}>{os.nome}</div>
-          {os.telefone && <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>{os.telefone}</div>}
+        <div style={{ background: 'var(--bg-primary)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', marginBottom: '24px' }}>
+          <p style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-placeholder)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Cliente</p>
+          <p style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>{os.nome}</p>
+          {os.telefone && (
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>{os.telefone}</p>
+          )}
         </div>
 
         {/* Serviço */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '600', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>SERVIÇO PRESTADO</div>
-          <div style={{ fontSize: '15px', fontWeight: '500', color: '#111827' }}>{os.servico}</div>
-          {os.descricao && <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px', lineHeight: '1.5' }}>{os.descricao}</div>}
+        <div style={{ marginBottom: '24px' }}>
+          <p style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-placeholder)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Serviço prestado</p>
+          <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)' }}>{os.servico}</p>
+          {os.descricao && (
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.5 }}>{os.descricao}</p>
+          )}
         </div>
 
         {/* Financeiro */}
-        <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '14px', color: '#6b7280' }}>Valor total</span>
-            <span style={{ fontSize: '14px', color: '#111827', fontWeight: '500' }}>{fmt(os.valor)}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '14px', color: '#6b7280' }}>Valor pago</span>
-            <span style={{ fontSize: '14px', color: '#065F46', fontWeight: '500' }}>{fmt(os.valorPago)}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '14px', color: '#6b7280' }}>Saldo restante</span>
-            <span style={{ fontSize: '14px', color: '#DC2626', fontWeight: '500' }}>{fmt((os.valor || 0) - (os.valorPago || 0))}</span>
-          </div>
+        <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '20px', marginBottom: '24px' }}>
+          {[
+            { label: 'Valor total',    valor: fmt(os.valor),                              cor: 'var(--text-primary)' },
+            { label: 'Valor pago',     valor: fmt(os.valorPago),                          cor: 'var(--status-done)' },
+            { label: 'Saldo restante', valor: fmt((os.valor || 0) - (os.valorPago || 0)), cor: 'var(--pay-pending)' },
+          ].map(r => (
+            <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{r.label}</span>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: r.cor }}>{r.valor}</span>
+            </div>
+          ))}
           {os.formaPagamento && (
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '14px', color: '#6b7280' }}>Forma de pagamento</span>
-              <span style={{ fontSize: '14px', color: '#111827', fontWeight: '500' }}>{os.formaPagamento}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Forma de pagamento</span>
+              <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-primary)' }}>{os.formaPagamento}</span>
             </div>
           )}
         </div>
 
         {/* Total destaque */}
-        <div style={{ background: '#111827', borderRadius: '10px', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '15px', color: '#fff', fontWeight: '500' }}>Total do serviço</span>
-          <span style={{ fontSize: '22px', color: '#fff', fontWeight: '700' }}>{fmt(os.valor)}</span>
+        <div style={{ background: 'var(--text-primary)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', fontWeight: '500' }}>Total do serviço</span>
+          <span style={{ fontSize: '22px', fontWeight: '700', color: '#fff', letterSpacing: '-0.5px' }}>{fmt(os.valor)}</span>
         </div>
 
         {/* Rodapé */}
-        <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb' }}>
-          <div style={{ fontSize: '12px', color: '#9ca3af' }}>Este recibo não possui validade fiscal.</div>
-          <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>sistematiza.ai · sistematizaai@gmail.com</div>
+        <div style={{ textAlign: 'center', paddingTop: '20px', borderTop: '1px solid var(--border-subtle)' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-placeholder)' }}>Este recibo não possui validade fiscal.</p>
+          <p style={{ fontSize: '12px', color: 'var(--text-placeholder)', marginTop: '2px' }}>sistematiza.ai · sistematizaai@gmail.com</p>
         </div>
 
       </div>
@@ -87,9 +99,10 @@ export default function Recibo({ os, onVoltar }) {
         @media print {
           .no-print { display: none !important; }
           body { background: white !important; }
-          #recibo-content { border: none !important; box-shadow: none !important; }
+          #recibo-content { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
         }
       `}</style>
+
     </div>
   )
 }

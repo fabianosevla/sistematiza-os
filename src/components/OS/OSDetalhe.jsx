@@ -1,87 +1,111 @@
 import { statusConfig, pagamentoConfig } from '../../data/storage'
 
-const fmt = (v) => v ? `R$ ${parseFloat(v).toFixed(2).replace('.', ',')}` : 'R$ 0,00'
+const fmt = (v) => `R$ ${parseFloat(v || 0).toFixed(2).replace('.', ',')}`
+
+const infoBlock = (label, valor) => (
+  <div key={label}>
+    <p style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-placeholder)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>{label}</p>
+    <p style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.5 }}>{valor || '—'}</p>
+  </div>
+)
 
 export default function OSDetalhe({ os, onVoltar, onEditar, onExcluir, onMudarStatus, onEmitirRecibo }) {
-  const s = statusConfig[os.status]
-  const p = pagamentoConfig[os.statusPagamento] || pagamentoConfig.pendente
+  const st = statusConfig[os.status]
+  const pg = pagamentoConfig[os.statusPagamento] || pagamentoConfig.pendente
+  const saldo = (os.valor || 0) - (os.valorPago || 0)
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem' }}>
-        <button onClick={onVoltar} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '8px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '14px', color: '#111827' }}>← Voltar</button>
-        <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#111827', margin: 0, flex: 1 }}>Detalhe da OS</h1>
-        <button onClick={onEditar} style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '8px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '13px', color: '#111827' }}>✏️ Editar</button>
-        <button onClick={onExcluir} style={{ background: '#FEF2F2', border: '0.5px solid #FECACA', borderRadius: '8px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontSize: '13px', color: '#DC2626' }}>🗑️ Excluir</button>
+    <div style={{ padding: '32px' }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px', gap: '16px', flexWrap: 'wrap' }}>
+        <div>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            <span style={{ cursor: 'pointer', color: 'var(--brand)' }} onClick={onVoltar}>← Voltar</span>
+          </p>
+          <h1 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>{os.nome}</h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>{os.servico} · {os.data}</p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+          <button onClick={onEditar}
+            style={{ background: 'var(--bg-layer-02)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '8px 16px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            ✏️ Editar
+          </button>
+          <button onClick={onExcluir}
+            style={{ background: 'var(--pay-pending-bg)', border: '1px solid #FECACA', borderRadius: 'var(--radius-md)', padding: '8px 16px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', color: 'var(--pay-pending)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            🗑️ Excluir
+          </button>
+        </div>
       </div>
 
-      {/* Info principal */}
-      <div style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
-          <div>
-            <div style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>{os.nome}</div>
-            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>{os.telefone}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+
+        {/* Info principal */}
+        <div style={{ background: 'var(--bg-layer-01)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Detalhes</p>
+            <span style={{ fontSize: '11px', fontWeight: '600', padding: '3px 10px', borderRadius: 'var(--radius-full)', background: st.bg, color: st.texto }}>{st.label}</span>
           </div>
-          <span style={{ fontSize: '12px', fontWeight: '500', padding: '4px 12px', borderRadius: '999px', background: s.bg, color: s.texto }}>{s.label}</span>
+          {infoBlock('Telefone', os.telefone)}
+          {infoBlock('Descrição', os.descricao)}
+          {infoBlock('Observações', os.observacoes)}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          {[
-            { label: 'SERVIÇO', valor: os.servico || '—' },
-            { label: 'DATA',    valor: os.data    || '—' },
-            { label: 'DESCRIÇÃO',   valor: os.descricao   || '—', full: true },
-            { label: 'OBSERVAÇÕES', valor: os.observacoes || '—', full: true },
-          ].map(item => (
-            <div key={item.label} style={{ gridColumn: item.full ? '1 / -1' : 'auto' }}>
-              <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '4px', letterSpacing: '0.08em', fontWeight: '600' }}>{item.label}</div>
-              <div style={{ fontSize: '14px', color: '#111827', lineHeight: '1.5' }}>{item.valor}</div>
+        {/* Financeiro */}
+        <div style={{ background: 'var(--bg-layer-01)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Financeiro</p>
+            <span style={{ fontSize: '11px', fontWeight: '600', padding: '3px 10px', borderRadius: 'var(--radius-full)', background: pg.bg, color: pg.cor }}>{pg.label}</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+            <div style={{ background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', padding: '12px' }}>
+              <p style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-placeholder)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>Total</p>
+              <p style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>{fmt(os.valor)}</p>
             </div>
-          ))}
-        </div>
-      </div>
+            <div style={{ background: 'var(--status-done-bg)', borderRadius: 'var(--radius-md)', padding: '12px' }}>
+              <p style={{ fontSize: '10px', fontWeight: '700', color: 'var(--status-done)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>Pago</p>
+              <p style={{ fontSize: '16px', fontWeight: '700', color: 'var(--status-done)' }}>{fmt(os.valorPago)}</p>
+            </div>
+            <div style={{ background: saldo > 0 ? 'var(--pay-pending-bg)' : 'var(--status-done-bg)', borderRadius: 'var(--radius-md)', padding: '12px' }}>
+              <p style={{ fontSize: '10px', fontWeight: '700', color: saldo > 0 ? 'var(--pay-pending)' : 'var(--status-done)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>Saldo</p>
+              <p style={{ fontSize: '16px', fontWeight: '700', color: saldo > 0 ? 'var(--pay-pending)' : 'var(--status-done)' }}>{fmt(saldo)}</p>
+            </div>
+          </div>
 
-      {/* Financeiro */}
-      <div style={{ background: '#f9fafb', border: '0.5px solid #e5e7eb', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <p style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>Financeiro</p>
-          <span style={{ fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '999px', background: p.bg, color: p.cor }}>{p.label}</span>
+          {os.formaPagamento && (
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+              Forma de pagamento: <strong style={{ color: 'var(--text-primary)' }}>{os.formaPagamento}</strong>
+            </p>
+          )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-          <div>
-            <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '4px', letterSpacing: '0.08em', fontWeight: '600' }}>VALOR TOTAL</div>
-            <div style={{ fontSize: '18px', fontWeight: '600', color: '#111827' }}>{fmt(os.valor)}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '4px', letterSpacing: '0.08em', fontWeight: '600' }}>VALOR PAGO</div>
-            <div style={{ fontSize: '18px', fontWeight: '600', color: '#065F46' }}>{fmt(os.valorPago)}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '10px', color: '#9ca3af', marginBottom: '4px', letterSpacing: '0.08em', fontWeight: '600' }}>SALDO</div>
-            <div style={{ fontSize: '18px', fontWeight: '600', color: '#DC2626' }}>{fmt((os.valor || 0) - (os.valorPago || 0))}</div>
-          </div>
-        </div>
-        {os.formaPagamento && (
-          <div style={{ marginTop: '1rem', fontSize: '13px', color: '#6b7280' }}>
-            Forma de pagamento: <strong style={{ color: '#111827' }}>{os.formaPagamento}</strong>
-          </div>
-        )}
       </div>
 
       {/* Mudar status */}
-      <p style={{ fontSize: '13px', fontWeight: '500', color: '#6b7280', marginBottom: '0.75rem' }}>Mudar status</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
-        {Object.entries(statusConfig).map(([key, val]) => (
-          <button key={key} onClick={() => onMudarStatus(key)}
-            style={{ background: os.status === key ? val.bg : '#f9fafb', border: os.status === key ? `1.5px solid ${val.cor}` : '0.5px solid #e5e7eb', borderRadius: '10px', padding: '0.75rem 1rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: val.cor }} />
-            <span style={{ fontSize: '14px', fontWeight: os.status === key ? '500' : '400', color: os.status === key ? val.texto : '#6b7280' }}>{val.label}</span>
-            {os.status === key && <span style={{ marginLeft: 'auto', fontSize: '12px', color: val.texto }}>✓ atual</span>}
-          </button>
-        ))}
+      <div style={{ background: 'var(--bg-layer-01)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)', padding: '24px', marginBottom: '16px' }}>
+        <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '14px' }}>Status da OS</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+          {Object.entries(statusConfig).map(([key, val]) => {
+            const ativo = os.status === key
+            return (
+              <button key={key} onClick={() => onMudarStatus(key)}
+                style={{ background: ativo ? val.bg : 'var(--bg-primary)', border: ativo ? `1.5px solid ${val.cor}` : '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '12px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.15s' }}
+                onMouseEnter={e => { if (!ativo) e.currentTarget.style.borderColor = 'var(--border-strong)' }}
+                onMouseLeave={e => { if (!ativo) e.currentTarget.style.borderColor = 'var(--border-subtle)' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: val.cor, flexShrink: 0 }} />
+                <span style={{ fontSize: '13px', fontWeight: ativo ? '600' : '400', color: ativo ? val.texto : 'var(--text-secondary)' }}>{val.label}</span>
+                {ativo && <span style={{ marginLeft: 'auto', fontSize: '11px', color: val.texto, fontWeight: '600' }}>✓</span>}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Emitir recibo */}
-      <button onClick={onEmitirRecibo} style={{ width: '100%', background: '#111827', color: '#fff', border: 'none', borderRadius: '12px', padding: '0.9rem', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
+      <button onClick={onEmitirRecibo}
+        style={{ width: '100%', background: 'var(--text-primary)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', padding: '13px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+        onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+        onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
         🧾 Emitir Recibo
       </button>
     </div>
